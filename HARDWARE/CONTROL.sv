@@ -1,10 +1,10 @@
-module CONTROL #(parameter TAM_INS=7, TAM_ALUOP=2, TAM_AUIPCLUI=2) (INSTRUCTION, BRANCH, MEMREAD, MEMTOREG, ALUOP, MEMWRITE, ALUSRC, REGWRITE); //AÑADIR AUIPCLUI
+module CONTROL #(parameter TAM_INS=7, TAM_ALUOP=2, TAM_AUIPCLUI=2) (INSTRUCTION, BRANCH, MEMREAD, MEMTOREG, ALUOP, MEMWRITE, ALUSRC, REGWRITE, AUIPCLUI); 
 
 input [TAM_INS-1:0] INSTRUCTION;
 
 output BRANCH, MEMREAD, MEMTOREG, MEMWRITE,  ALUSRC, REGWRITE;
 output [TAM_ALUOP-1:0] ALUOP;
-//output [TAM_AUIPCLUI-1:0] AUIPCLUI;
+output [TAM_AUIPCLUI-1:0] AUIPCLUI;
 
 
 //CASOS PARA CADA OPCODE (INSTRUCCTION): LOGICA DE SALIDA
@@ -25,7 +25,7 @@ begin
 	ALUSRC	= 	1'b0;
 	REGWRITE	= 	1'b1;
 	ALUOP		= 	2'b00;
-	//AUIPCLUI	= 	2'b00;
+	AUIPCLUI	= 	2'b10;
 	end
 	
 	//I-FORMAT INMEDIATA (ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI)
@@ -39,7 +39,7 @@ begin
 	ALUSRC	= 	1'b1;
 	REGWRITE	= 	1'b1;
 	ALUOP		= 	2'b01;
-	//AUIPCLUI	= 	2'b00;
+	AUIPCLUI	= 	2'b10;
 	end
 	
 	//I-FORMAT CARGA (LW)
@@ -53,7 +53,7 @@ begin
 	ALUSRC	= 	1'b1;
 	REGWRITE	= 	1'b1;
 	ALUOP		= 	2'b01;
-	//AUIPCLUI	= 	2'b00;
+	AUIPCLUI	= 	2'b10;
 	end
 	
 	//S-FORMAT (SW)
@@ -67,7 +67,7 @@ begin
 	ALUSRC	= 	1'b1;
 	REGWRITE	= 	1'b0;
 	ALUOP		= 	2'b10;
-	//AUIPCLUI	= 	2'b00;
+	AUIPCLUI	= 	2'b10;
 	end
 	
 	//B-FORMAT (BEQ, BNE)
@@ -81,7 +81,7 @@ begin
 	ALUSRC	= 	1'b1;
 	REGWRITE	= 	1'b0;
 	ALUOP		= 	2'b11;
-	//AUIPCLUI	= 	2'b00;
+	AUIPCLUI	= 	2'b10;
 	end
 	
 	//U-FORMAT (LUI)
@@ -95,7 +95,7 @@ begin
 	ALUSRC	= 	1'b1;
 	REGWRITE	= 	1'b1;
 	ALUOP		= 	2'b01;
-	//AUIPCLUI	= 	2'b00;
+	AUIPCLUI	= 	2'b10;
 	end
 	
 	//U-FORMAT (AUIPC)
@@ -109,7 +109,7 @@ begin
 	ALUSRC	= 	1'b1;
 	REGWRITE	= 	1'b1;
 	ALUOP		= 	2'b01;
-	//AUIPCLUI	= 	2'b00;
+	AUIPCLUI	= 	2'b01;
 	end
 	
 	//J-FORMAT (JAL)
@@ -123,7 +123,7 @@ begin
 	ALUSRC	= 	1'b1;
 	REGWRITE	= 	1'b1;
 	ALUOP		= 	2'b01;
-	//AUIPCLUI	= 	2'b00;
+	AUIPCLUI	= 	2'b10;
 	end
 	
 	//J-FORMAT (JALR) 
@@ -137,7 +137,7 @@ begin
 	ALUSRC	= 	1'b1;
 	REGWRITE	= 	1'b1;
 	ALUOP		= 	2'b01;
-	//AUIPCLUI	= 	2'b00;
+	AUIPCLUI	= 	2'b10;
 	end
 	
 	//DEFAULT
@@ -151,7 +151,7 @@ begin
 	ALUSRC	= 	1'b0;
 	REGWRITE	= 	1'b0;
 	ALUOP		= 	2'b00;
-	//AUIPCLUI	= 	2'b00;
+	AUIPCLUI	= 	2'b10;
 	end
 
 	endcase
