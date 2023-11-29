@@ -4,13 +4,15 @@ module MUX31 (IN1, IN2, SELECT, OUT);
 	output logic [31:0] OUT;
 	
 always_comb
+begin
 	if (SELECT == 2'b00)
 		OUT = IN1;
 	else if (SELECT == 2'b01)
 		OUT = 32'd0;
 	else if (SELECT == 2'b10)
 		OUT = IN2;
-	else if (SELECT == 2'b11)
+	else
 		OUT = 32'd0;
+end
 	
 endmodule 

@@ -44,6 +44,8 @@ assign DATA_OUT = (OE &&  !WR) ? DATA_OUT_AUX : 8'bz;
 	begin
           DATA_OUT_AUX = MRAM[ADDRESS];
       	end
+		else
+			DATA_OUT_AUX = 32'd0;
   end
   
 endmodule
