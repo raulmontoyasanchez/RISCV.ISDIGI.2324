@@ -1,4 +1,4 @@
-module CONTROL #(parameter TAM_INS=7, TAM_ALUOP=2, TAM_AUIPCLUI=2) (INSTRUCTION, BRANCH, MEMREAD, MEMTOREG, ALUOP, MEMWRITE, ALUSRC, REGWRITE, AUIPCLUI); 
+module CONTROL #(parameter TAM_INS=7, TAM_ALUOP=3, TAM_AUIPCLUI=2) (INSTRUCTION, BRANCH, MEMREAD, MEMTOREG, ALUOP, MEMWRITE, ALUSRC, REGWRITE, AUIPCLUI); 
 
 input [TAM_INS-1:0] INSTRUCTION;
 
@@ -24,7 +24,7 @@ begin
 	MEMWRITE	= 	1'b0;
 	ALUSRC	= 	1'b0;
 	REGWRITE	= 	1'b1;
-	ALUOP		= 	2'b00;
+	ALUOP		= 	3'b000;
 	AUIPCLUI	= 	2'b10;
 	end
 	
@@ -38,7 +38,7 @@ begin
 	MEMWRITE	= 	1'b0;
 	ALUSRC	= 	1'b1;
 	REGWRITE	= 	1'b1;
-	ALUOP		= 	2'b01;
+	ALUOP		= 	3'b001;
 	AUIPCLUI	= 	2'b10;
 	end
 	
@@ -52,7 +52,7 @@ begin
 	MEMWRITE	= 	1'b0;
 	ALUSRC	= 	1'b1;
 	REGWRITE	= 	1'b1;
-	ALUOP		= 	2'b01;
+	ALUOP		= 	3'b010;
 	AUIPCLUI	= 	2'b10;
 	end
 	
@@ -66,7 +66,7 @@ begin
 	MEMWRITE	= 	1'b1;
 	ALUSRC	= 	1'b1;
 	REGWRITE	= 	1'b0;
-	ALUOP		= 	2'b10;
+	ALUOP		= 	3'b011;
 	AUIPCLUI	= 	2'b10;
 	end
 	
@@ -80,7 +80,7 @@ begin
 	MEMWRITE	= 	1'b0;
 	ALUSRC	= 	1'b1;
 	REGWRITE	= 	1'b0;
-	ALUOP		= 	2'b11;
+	ALUOP		= 	3'b100;
 	AUIPCLUI	= 	2'b10;
 	end
 	
@@ -94,7 +94,7 @@ begin
 	MEMWRITE	= 	1'b0;
 	ALUSRC	= 	1'b1;
 	REGWRITE	= 	1'b1;
-	ALUOP		= 	2'b01;
+	ALUOP		= 	3'b101;
 	AUIPCLUI	= 	2'b10;
 	end
 	
@@ -108,7 +108,7 @@ begin
 	MEMWRITE	= 	1'b0;
 	ALUSRC	= 	1'b1;
 	REGWRITE	= 	1'b1;
-	ALUOP		= 	2'b01;
+	ALUOP		= 	3'b110;
 	AUIPCLUI	= 	2'b01;
 	end
 	
@@ -122,7 +122,7 @@ begin
 	MEMWRITE	= 	1'b0;
 	ALUSRC	= 	1'b1;
 	REGWRITE	= 	1'b1;
-	ALUOP		= 	2'b01;
+	ALUOP		= 	3'b111;
 	AUIPCLUI	= 	2'b10;
 	end
 	
@@ -130,13 +130,13 @@ begin
 	
 	7'b1100111: 
 	begin
-	BRANCH	= 	1'b0;
-	MEMREAD	= 	1'b0;
+	BRANCH		= 	1'b0;
+	MEMREAD		= 	1'b0;
 	MEMTOREG	= 	1'b0;
 	MEMWRITE	= 	1'b0;
-	ALUSRC	= 	1'b1;
+	ALUSRC		= 	1'b1;
 	REGWRITE	= 	1'b1;
-	ALUOP		= 	2'b01;
+	ALUOP		= 	3'b111;
 	AUIPCLUI	= 	2'b10;
 	end
 	
@@ -150,7 +150,7 @@ begin
 	MEMWRITE	= 	1'b0;
 	ALUSRC	= 	1'b0;
 	REGWRITE	= 	1'b0;
-	ALUOP		= 	2'b00;
+	ALUOP		= 	3'b000;
 	AUIPCLUI	= 	2'b10;
 	end
 
