@@ -26,5 +26,4 @@ initial
 begin
  $readmemh("codigo_ordenamiento.txt", MROM); 				//"ROM.LIST" ES NUESTRO ARCHIVO DE MEMORIA ROM
 end
-hola
 endmodule 
