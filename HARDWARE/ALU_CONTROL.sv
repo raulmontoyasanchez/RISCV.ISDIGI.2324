@@ -19,7 +19,7 @@ case (ALUOP)
 	endcase
 	end
 3'b001: begin// I FORMAT
-	case(INSTRUCCION)
+	casex(INSTRUCCION)
 	4'bx000: ALUSELECT=	4'b0000;//ADDI
 	4'bx001: ALUSELECT= 4'b0011; // SLLI
 	4'bx010: ALUSELECT= 4'b0100; // SLTI
@@ -36,7 +36,7 @@ case (ALUOP)
 	 ALUSELECT= 4'b0000; 
 3'b100: // B-FORMAT
 	begin 
-	case (INSTRUCCION)
+	casex(INSTRUCCION)
 	4'bx000: ALUSELECT= 4'b1000; //BEQ
 	4'bx001: ALUSELECT=4'b1001;	//BNE
 	4'bx100: ALUSELECT=4'b1010;	//BLT
@@ -53,4 +53,3 @@ case (ALUOP)
 default:ALUSELECT= 4'b0000; 
 endcase
 endmodule  
-
