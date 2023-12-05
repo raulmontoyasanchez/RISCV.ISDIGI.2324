@@ -28,5 +28,5 @@ initial
 begin
  $readmemb("ROM.LIST", MROM); 				//"ROM.LIST" ES NUESTRO ARCHIVO DE MEMORIA ROM
 end
-
+hola
 endmodule 
