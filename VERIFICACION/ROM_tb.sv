@@ -16,7 +16,7 @@ end
 
 initial
 begin
-$readmemh("codigo_fibonacci.txt")
+$readmemh("codigo_fibonacci.txt",MROM)
 end
 $stop
 
