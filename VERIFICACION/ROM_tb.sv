@@ -5,7 +5,7 @@ reg [31:0]address_instr;
 reg [31:0]instr;
 ROM ROM_ins(	
 		.INS_ADDRESS(address), 
-		.INSTRUCTION(instr)
+		.INSTRUCTION_OUT(instr)
 );
 //RELOJ
 initial                                                
