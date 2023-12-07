@@ -3,7 +3,7 @@ module ROM_tb();
 reg CLK;
 reg [31:0]address_instr; 
 reg [31:0]instr;
-ROM ROM_ins(	.CLK(CLK),
+ROM ROM_ins(	
 		.INS_ADDRESS(address), 
 		.INSTRUCTION(instr)
 );
