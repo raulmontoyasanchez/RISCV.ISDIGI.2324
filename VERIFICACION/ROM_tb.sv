@@ -1,23 +1,23 @@
 `timescale 1 ns/ 1 ps
 module ROM_tb();
-reg CLK;
-reg [31:0]address_instr; 
-reg [31:0]instr;
+logic READ_EN;
+logic [9:0]ADDRESS_INSTR; 
+logic [31:0]INSTR;
+reg [31:0]  MROM [1023:0];
+
 ROM ROM_ins(	
-		.INS_ADDRESS(address), 
-		.INSTRUCTION_OUT(instr)
+		.INS_ADDRESS(ADDRESS_INSTR), 
+		.INSTRUCTION_OUT(INSTR),
+		.READ_EN(READ_EN)
 );
-//RELOJ
-initial                                                
-begin   
-CLK=1'b0;                                               
-forever # 10 CLK=!CLK;                    
-end 
+
+
 
 initial
 begin
-$readmemh("codigo_fibonacci.txt",MROM)
+READ_EN=1'b1;                                               
+$readmemh("W:\\A ISDIGT FINAL\\PRUEB-POLILABS\\codigo_fibonacci.txt",MROM);
+ADDRESS_INSTR=10'b0;
+$stop();
 end
-$stop
-
 endmodule
