@@ -1,4 +1,4 @@
-module TOP #(parameter ROM_INS=32, RAM_DATA=32, ROM_ADD=10, RAM_ADD=10) (CLK, RST);
+module TOP #(parameter ROM_INS=32, RAM_DATA=32, ROM_ADD=10, RAM_ADD=10) (CLK, RESET_N);
 
 //VARIABLES GENERALES
 input CLK, RESET_N;
