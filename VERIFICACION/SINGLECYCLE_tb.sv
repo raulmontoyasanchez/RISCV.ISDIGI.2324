@@ -2,11 +2,11 @@
 module SINGLECYCLE_tb();
 
 localparam T = 20;
-logic CLK,RST;
+logic CLK,RESET_N;
 
 TOP TOP_inst( 
                 .CLK(CLK), 
-                .RST(RST)
+                .RESET_N(RESET_N)
 );
 
 
@@ -19,9 +19,10 @@ always
 initial 
 begin
 CLK=0;
-RST=0;
+RESET_N=0;
 #10
 CLK = 1; 
+RESET_N=1;
 #1000000; 
 //$readmemh("W:\\ISDIGITAREAFINAL\\codigo_fibonacci.txt",TOP_inst.RAM_INST.MRAM);
 //$readmemh("W:\\ISDIGITAREAFINAL\\codigo_fibonacci.txt",TOP_inst.ROM_INST.MROM);  
