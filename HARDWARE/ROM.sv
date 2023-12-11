@@ -24,6 +24,6 @@ assign INSTRUCTION_OUT =(READ_EN)? MROM[INS_ADDRESS] :32'b0;
 
 initial 
 begin
- $readmemh("W:\\A ISDIGT FINAL\\PRUEB-POLILABS\\codigo_fibonacci.txt", MROM); 				//"ROM.LIST" ES NUESTRO ARCHIVO DE MEMORIA ROM
+ $readmemh("W:\\ISDIGITAREAFINAL\\addi.txt", MROM); 				//"ROM.LIST" ES NUESTRO ARCHIVO DE MEMORIA ROM
 end
 endmodule 

@@ -1,13 +1,10 @@
 `timescale 1 ns/ 1 ps
-module SINGLECYCLE();
+module SINGLECYCLE_tb();
+
+localparam T = 20;
 logic CLK,RST;
 
-
 TOP TOP_inst( 
-                .ROM_INS(ROM_INS),     
-                .RAM_DATA(RAM_DATA), 
-                .ROM_ADD(ROM_ADD), 
-                .RAM_ADD(RAM_ADD) 
                 .CLK(CLK), 
                 .RST(RST)
 );
@@ -19,8 +16,16 @@ always
 		#(T/2) CLK = ~CLK;
 	end
 
-initial begin
-$readmemh("W:\\A ISDIGT FINAL\\PRUEB-POLILABS\\codigo_fibonacci.txt",MRAM);
-$readmemh("W:\\A ISDIGT FINAL\\PRUEB-POLILABS\\codigo_fibonacci.txt",MROM);    
-end
+initial 
+begin
+CLK=0;
+RST=0;
+#10
+CLK = 1; 
+#1000000; 
+//$readmemh("W:\\ISDIGITAREAFINAL\\codigo_fibonacci.txt",TOP_inst.RAM_INST.MRAM);
+//$readmemh("W:\\ISDIGITAREAFINAL\\codigo_fibonacci.txt",TOP_inst.ROM_INST.MROM);  
+ 
+$stop;
+end 
 endmodule
