@@ -1,6 +1,6 @@
-module BANCO_REGISTROS (CLK, RSTa, READ_REG1, READ_REG2, WRITE_REG, DATA_IN, WRITE_ENABLE, READ_DATA1, READ_DATA2);	
+module BANCO_REGISTROS (CLK, RESET_N, READ_REG1, READ_REG2, WRITE_REG, DATA_IN, WRITE_ENABLE, READ_DATA1, READ_DATA2);	
 
-input CLK, RSTa;
+input CLK, RESET_N;
 input [4:0] READ_REG1, READ_REG2;
 input [31:0] DATA_IN;
 input WRITE_ENABLE;
@@ -16,9 +16,9 @@ assign READ_DATA1 = (WRITE_REG == 5'd0) ? 0:BANCO_REG_AUX[READ_REG1];
 assign READ_DATA2 = (WRITE_REG == 5'd0) ? 0:BANCO_REG_AUX[READ_REG2];
 
 	
-always @(posedge CLK or negedge RSTa)
+always @(posedge CLK or negedge RESET_N)
 begin
-	if (!RSTa)
+	if (!RESET_N)
 		begin
 		BANCO_REG_AUX <= '0;
 		end
