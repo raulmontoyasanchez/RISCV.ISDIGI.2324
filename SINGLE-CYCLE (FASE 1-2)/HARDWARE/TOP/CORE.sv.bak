@@ -8,8 +8,8 @@ input CLK, RESET_N;
 input [31:0] DATA_IMEM;
 input [31:0] DATA_READ_DMEM;
 
-output [31:0] DIR_IMEM;
-output [31:0] DIR_DMEM;
+output [9:0] DIR_IMEM;
+output [9:0] DIR_DMEM;
 output [31:0] DATA_WRITE_DMEM;
 output READ, WRITE;
 

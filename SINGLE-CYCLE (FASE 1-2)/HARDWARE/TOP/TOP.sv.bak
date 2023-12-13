@@ -11,7 +11,7 @@ wire READ, WRITE;
 //CABLES RAM 
 output wire [31:0] RAM_DATAOUT;
 output wire [31:0] RAM_DATAIN;
-output wire [31:0] RAM_ADDRESS;
+output wire [9:0] RAM_ADDRESS;
 
 
 //RAM INSTANCIA
