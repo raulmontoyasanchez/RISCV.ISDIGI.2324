@@ -1,0 +1,228 @@
+//CORE PIPELINE 
+
+//PENDIENTE PREGUNTAR DUDAS COMENTADAS E IMPLEMENTAR MODULO CONTROL POR FASES.
+
+module CORE(CLK, RESET_N, DATA_IMEM, DATA_READ_DMEM, DIR_IMEM, DIR_DMEM, DATA_WRITE_DMEM, READ, WRITE);
+
+//DECLARACION DE ENTRADAS Y SALIDAS
+
+input CLK, RESET_N;
+input [31:0] DATA_IMEM;
+input [31:0] DATA_READ_DMEM;
+
+output [9:0] DIR_IMEM;
+output [9:0] DIR_DMEM;
+output [31:0] DATA_WRITE_DMEM;
+output READ, WRITE;
+
+//DECLARACION DE CONEXIONES AUXILIARES ENTRE MODULOS
+
+wire [31:0] READ_DATA1_AUX, READ_DATA2_AUX, INMEDIATO_AUX, ALURESULT_AUX, MUX_OUT1, MUX_OUT2, MUX_OUT3;
+wire BRANCH_AUX, ZERO_AUX, MEMREAD_AUX, MEMTOREG_AUX, MEMWRITE_AUX, ALUSRC_AUX, REGWRITE_AUX;
+wire [1:0] AUIPCLUI_AUX;
+wire [2:0] ALUOP_AUX;
+wire [3:0] ALUSELECT_AUX;
+wire MUX_SELECT2;
+
+reg [31:0] PC;
+
+//LA INSTRUCCION SEGMENTADA SE USA DIRECTAMENTE LAS DEL SEGMENTADO (CREO)
+
+//wire [6:0]INSTRUCTION60;
+//wire [4:0]INSTRUCTION1915;
+//wire [4:0]INSTRUCTION2420;
+//wire [4:0]INSTRUCTION117;
+//wire [3:0]INSTRUCTION301412;
+
+wire [31:0]INSTRUCTION;
+
+//assign INSTRUCTION60 = DATA_IMEM[6:0] ;
+//assign INSTRUCTION1915 = DATA_IMEM[19:15];
+//assign INSTRUCTION2420 = DATA_IMEM[24:20];
+//assign INSTRUCTION117 = DATA_IMEM[11:7] ;
+//assign INSTRUCTION301412 = {DATA_IMEM[30], DATA_IMEM[14:12]};
+
+assign INSTRUCTION = DATA_IMEM;
+
+//ASIGACIONES CONTINUAS 
+
+assign  PCSRC = (BRANCH_AUX && ZERO_AUX) ? 1'b1:1'b0;
+assign  DIR_IMEM = PC;
+assign  DIR_DMEM = ALURESULT_OUT_EX;
+assign  DATA_WRITE_DMEM = READ_DATA_2_OUT_EX;
+assign  WRITE = (MEMWRITE_AUX) ? 1'b1:1'b0;
+assign  READ = (MEMREAD_AUX) ? 1'b1:1'b0;
+
+// MULTIPLEXOR DEL PROGRAM COUNTER:
+
+always @(posedge CLK or negedge RESET_N)
+begin 
+   if (!RESET_N)
+       PC <= 32'b0;
+   else  
+		begin
+      case (PCSRC) // 		MUX QUE SELECCIONA SI SUMAMOS 1 O 4 AL PC
+          1'b0 : PC <= PC + 1'b4;
+          1'b1 : PC <= PC_OUT_EX; 
+      endcase
+      end 
+end
+
+//INSTANCIAS
+
+//DATA_IMEM ES LA INSTRUCCION SALIDA DE LA ROM
+
+CONTROL CONTROL_inst (.INSTRUCTION(INSTRUCTION60_OUT_DI), .BRANCH(BRANCH_AUX), .MEMREAD(MEMREAD_AUX), .MEMTOREG(MEMTOREG_AUX), .ALUOP(ALUOP_AUX), .MEMWRITE(MEMWRITE_AUX), .ALUSRC(ALUSRC_AUX), .REGWRITE(REGWRITE_AUX), .AUIPCLUI(AUIPCLUI_AUX));
+
+
+GENINM GENINM_inst (.INSTRUCCION(INST_OUT_IF), .INMEDIATO(INMEDIATO_AUX));
+
+
+MUX MUX_inst1 (.IN1(READ_DATA_2_OUT_DI), .IN2(INMEDIATO_OUT_DI), .SELECT(ALUSRC_AUX), .OUT(MUX_OUT1)); //MUX SELECCIONA REGISTRO O INMEDIATO
+MUX MUX_inst2 (.IN1(DATA_READ_DMEM_ME), .IN2(ALURESULT_OUT_ME), .SELECT(MEMTOREG_AUX), .OUT(MUX_OUT2)); // MUX SELECCIONA SI MEMTOREG O NO
+
+//MUX31 MUX31_inst3 (.IN1(PC), .IN2(READ_DATA1_AUX), .SELECT(AUIPCLUI_AUX), .OUT(MUX_OUT3)); //MUX 3 A 1 --- NO NECESARIO PARA EL PIPELINE
+
+BANCO_REGISTROS BANCO_REGISTRO_inst (.CLK(CLK), .RSTa(RSTa), .READ_REG1(INSTRUCTION1915_OUT_DI), .READ_REG2(INSTRUCTION2420_OUT_DI), .WRITE_REG(INSTRUCTION117_OUT_ME), .DATA_IN(MUX_OUT2), .WRITE_ENABLE(MEMTOREG_AUX), .READ_DATA1(READ_DATA1_AUX), .READ_DATA2(READ_DATA2_AUX));	
+
+
+ALU ALU_inst(.A(READ_DATA_1_OUT_DI), .B(MUX_OUT1), .RESULT(ALURESULT_AUX), .OPERATION(ALUSELECT_AUX), .ZERO(ZERO_AUX));
+
+
+ALU_CONTROL ALU_CONTROL_inst(.ALUOP(ALUOP_AUX), .INSTRUCCION(INSTRUCTION301412_OUT_DI), .ALUSELECT(ALUSELECT_AUX));
+
+
+
+//				---------------						---------------				---------------					---------------					---------------					---------------						---------------
+
+
+
+//SEGMENTADO: DISEÑO PIPELINE (FASE 3)
+
+//1: ETAPA IF (PROGRAM COUNTER - LECTURA DE LA INSTRUCCION E INCREMENTO DEL PC) ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+reg [31:0] PC_OUT_IF;
+reg [31:0] INST_OUT_IF;
+
+always @(posedge CLK or negedge RESET_N)
+begin 
+   if (!RESET_N)
+       PC_OUT_IF <= 32'b0;
+		 INST_OUT_IF <= 32'b0; 
+   else  
+		 PC_OUT_IF <= PC;
+		 INST_OUT_IF <= INSTRUCTION; 
+end
+
+
+//2: ETAPA DI (DECODIFICACION DE INSTRUCCION Y LECTURA DE REGISTROS) -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+reg WB; //ETAPA WRITE BACK (ESCRITURA DE REGISTRO)
+reg ME;  //ETAPA MEMORY (MEMORIA)
+reg EX; //ETAPA EXECUTION (EJECUCION)
+
+reg [31:0] READ_DATA_1_OUT_DI;
+reg [31:0] READ_DATA_2_OUT_DI;
+reg [31:0] INMEDIATO_OUT_DI;
+
+reg [6:0] INSTRUCTION60_OUT_DI;
+reg [4:0] INSTRUCTION1915_OUT_DI;
+reg [4:0] INSTRUCTION2420_OUT_DI;
+reg [4:0] INSTRUCTION117_OUT_DI;     //COMPROBAR, RECORRE TODAS LAS ETAPAS HASTA LLEGAR A WRITE_REG DEL BANCO DE REGISTROS.
+reg [3:0] INSTRUCTION301412_OUT_DI;
+
+reg [31:0] PC_OUT_DI; 
+
+assign INSTRUCTION60_OUT_DI = INST_OUT_IF[6:0];
+assign INSTRUCTION1915_OUT_DI = INST_OUT_IF[19:15];
+assign INSTRUCTION2420_OUT_DI = INST_OUT_IF[24:20];
+assign INSTRUCTION117_OUT_DI = INST_OUT_IF[11:7] ;
+assign INSTRUCTION301412_OUT_DI = {INST_OUT_IF[30], INST_OUT_IF[14:12]};
+
+wire BRANCH_AUX, ZERO_AUX, MEMREAD_AUX, MEMTOREG_AUX, MEMWRITE_AUX, ALUSRC_AUX, REGWRITE_AUX;
+
+always @(posedge CLK or negedge RESET_N)
+begin
+	if (!RESET_N)
+	begin
+		WB <= 1'b0;
+		ME <= 1'b0;
+		EX <= 1'b0;
+		READ_DATA_1_OUT_DI <= 32'b0;
+		READ_DATA_2_OUT_DI <= 32'b0;
+		INMEDIATO_OUT_DI <= 32'b0;	
+		PC_OUT_DI <= 32'b0;
+	end
+	else
+	begin
+		WB <= 1'b0;
+		ME <= 1'b0;
+		EX <= 1'b0;
+		READ_DATA_1_OUT_DI <= READ_DATA1_AUX;
+		READ_DATA_2_OUT_DI <= READ_DATA2_AUX;
+		INMEDIATO_OUT_DI <= INMEDIATO_AUX;
+		PC_OUT_DI <= PC_OUT_IF;
+	end
+end		
+	
+//3: ETAPA EX (EJECUCION) ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+reg [31:0] ALURESULT_OUT_EX;
+reg ZERO_OUT_EX;
+
+reg [31:0] PC_OUT_EX;
+
+reg [31:0] SUM_AUX_EX; //VARIABLE LOCAL DE LA ETAPA EX
+assign SUM_AUX_EX = PC_OUT_DI + INMEDIATO_OUT_DI; //¿QUE ES "SHIFT LEFT 1" EN EL ESQUEMA?
+
+reg [31:0] READ_DATA_2_OUT_EX;
+
+reg [4:0] INSTRUCTION117_OUT_EX;
+
+always @(posedge CLK or negedge RESET_N)
+begin
+	if (!RESET_N)
+	begin
+		ALURESULT_OUT_EX <= 32'b0;
+		ZERO_OUT_EX <= 1'b0;
+		READ_DATA_2_OUT_EX <= 32'b0;
+		INSTRUCTION117_OUT_EX <= 32'b0;
+		PC_OUT_EX <= 32'b0;
+	end
+	else
+	begin
+		ALURESULT_OUT_EX <= ALURESULT_AUX;	
+		ZERO_OUT_EX <= ZERO_AUX;
+		READ_DATA_2_OUT_EX <= READ_DATA_2_OUT_DI;
+		INSTRUCTION117_OUT_EX <= INSTRUCTION117_OUT_DI;
+		PC_OUT_EX <= SUM_AUX_EX;
+	end
+end		
+		
+		
+//4 Y 5: ETAPA ME y WB (MEMORIA Y ESCRITURA EN REGISTRO) ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+reg [4:0] INSTRUCTION117_OUT_ME;
+reg [31:0] ALURESULT_OUT_ME;
+reg [31:0] DATA_READ_DMEM_ME;
+
+always @(posedge CLK or negedge RESET_N)
+begin
+	if (!RESET_N)
+	begin
+		ALURESULT_OUT_ME <= 32'b0;
+		INSTRUCTION117_OUT_ME <= 32'b0;
+		DATA_READ_DMEM_ME <= 32'b0;
+	end
+	else
+	begin
+		INSTRUCTION117_OUT_ME <= INSTRUCTION117_OUT_EX;
+		ALURESULT_OUT_ME <= ALURESULT_OUT_EX;
+		DATA_READ_DMEM_ME <= DATA_READ_DMEM; //¿COMO ASIGNARLA EN EL CICLO CORRESPONDIENTE YA QUE DATA_READ_DMEM ES UN INPUT DEL CORE?
+	end
+end
+
+
+//FIN
+
+endmodule 
