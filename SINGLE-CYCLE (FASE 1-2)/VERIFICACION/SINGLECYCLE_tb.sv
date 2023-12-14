@@ -1,4 +1,4 @@
-`timescale 1 ns/ 1 ps
+`timescale 1 ns/ 100 ps
 module SINGLECYCLE_tb();
 
 localparam T = 20;
@@ -27,10 +27,10 @@ CLK=0;
 RESET_N=0;
 @(posedge CLK)
 RESET_N=1;
- 
+#(T*10);
 //$readmemh("W:\\ISDIGITAREAFINAL\\codigo_fibonacci.txt",TOP_inst.RAM_INST.MRAM);
 //$readmemh("W:\\ISDIGITAREAFINAL\\codigo_fibonacci.txt",TOP_inst.ROM_INST.MROM);  
  
-$stop;
+$stop();
 end 
 endmodule
