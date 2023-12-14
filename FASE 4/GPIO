@@ -1,0 +1,99 @@
+module GPIO (MEM1_DOUT, MEM1_DIN, MEM1_ENA, DOUT, DIN, segment_data1, segment_data2, segment_data3, segment_data4);
+
+input [15:0] MEM1_DOUT;
+input MEM1_ENA;
+input [15:0] DIN;
+
+output [15:0] MEM1_DIN;
+output [15:0] DOUT;
+
+wire [3:0] DOUT1, DOUT2, DOUT3, DOUT4;
+output reg [6:0] segment_data1, segment_data2, segment_data3, segment_data4;
+
+assign DOUT1 = DOUT [15:12];
+assign DOUT2 = DOUT [11:8];
+assign DOUT3 = DOUT [7:4];
+assign DOUT4 = DOUT [3:0];
+
+
+always @(DOUT1, DOUT2, DOUT3, DOUT4) 	//DISPLAY 7 SEGMENTOS
+begin
+case(DOUT1)
+4'h0: segment_data1 = 7'b1000000; // leds activos a 0.
+4'h1: segment_data1 = 7'b1111001; // --A--
+4'h2: segment_data1 = 7'b0100100; // |   |
+4'h3: segment_data1 = 7'b0110000; // F   B
+4'h4: segment_data1 = 7'b0011001; // |   |
+4'h5: segment_data1 = 7'b0010010; // --G--
+4'h6: segment_data1 = 7'b0000010; // |   |
+4'h7: segment_data1 = 7'b1111000; // E   C
+4'h8: segment_data1 = 7'b0000000; // |   |
+4'h9: segment_data1 = 7'b0011000; // --D--
+4'ha: segment_data1 = 7'b0001000;
+4'hb: segment_data1 = 7'b0000011;
+4'hc: segment_data1 = 7'b1000110;
+4'hd: segment_data1 = 7'b0100001;
+4'he: segment_data1 = 7'b0000110;
+4'hf: segment_data1 = 7'b0001110;
+endcase
+
+case(DOUT2)
+4'h0: segment_data2 = 7'b1000000; // leds activos a 0.
+4'h1: segment_data2 = 7'b1111001; // --A--
+4'h2: segment_data2 = 7'b0100100; // |   |
+4'h3: segment_data2 = 7'b0110000; // F   B
+4'h4: segment_data2 = 7'b0011001; // |   |
+4'h5: segment_data2 = 7'b0010010; // --G--
+4'h6: segment_data2 = 7'b0000010; // |   |
+4'h7: segment_data2 = 7'b1111000; // E   C
+4'h8: segment_data2 = 7'b0000000; // |   |
+4'h9: segment_data2 = 7'b0011000; // --D--
+4'ha: segment_data2 = 7'b0001000;
+4'hb: segment_data2 = 7'b0000011;
+4'hc: segment_data2 = 7'b1000110;
+4'hd: segment_data2 = 7'b0100001;
+4'he: segment_data2 = 7'b0000110;
+4'hf: segment_data2 = 7'b0001110;
+endcase
+
+case(DOUT3)
+4'h0: segment_data3 = 7'b1000000; // leds activos a 0.
+4'h1: segment_data3 = 7'b1111001; // --A--
+4'h2: segment_data3 = 7'b0100100; // |   |
+4'h3: segment_data3 = 7'b0110000; // F   B
+4'h4: segment_data3 = 7'b0011001; // |   |
+4'h5: segment_data3 = 7'b0010010; // --G--
+4'h6: segment_data3 = 7'b0000010; // |   |
+4'h7: segment_data3 = 7'b1111000; // E   C
+4'h8: segment_data3 = 7'b0000000; // |   |
+4'h9: segment_data3 = 7'b0011000; // --D--
+4'ha: segment_data3 = 7'b0001000;
+4'hb: segment_data3 = 7'b0000011;
+4'hc: segment_data3 = 7'b1000110;
+4'hd: segment_data3 = 7'b0100001;
+4'he: segment_data3 = 7'b0000110;
+4'hf: segment_data3 = 7'b0001110;
+endcase
+
+case(DOUT4)
+4'h0: segment_data4 = 7'b1000000; // leds activos a 0.
+4'h1: segment_data4 = 7'b1111001; // --A--
+4'h2: segment_data4 = 7'b0100100; // |   |
+4'h3: segment_data4 = 7'b0110000; // F   B
+4'h4: segment_data4 = 7'b0011001; // |   |
+4'h5: segment_data4 = 7'b0010010; // --G--
+4'h6: segment_data4 = 7'b0000010; // |   |
+4'h7: segment_data4 = 7'b1111000; // E   C
+4'h8: segment_data4 = 7'b0000000; // |   |
+4'h9: segment_data4 = 7'b0011000; // --D--
+4'ha: segment_data4 = 7'b0001000;
+4'hb: segment_data4 = 7'b0000011;
+4'hc: segment_data4 = 7'b1000110;
+4'hd: segment_data4 = 7'b0100001;
+4'he: segment_data4 = 7'b0000110;
+4'hf: segment_data4 = 7'b0001110;
+endcase
+
+end
+
+endmodule

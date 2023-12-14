@@ -1,0 +1,39 @@
+module MEMORY_CONTROLLER (DATA_READ_DMEM, DIR_DMEM, READ, WRITE, DATA_WRITE_DMEM, MEM0_DW, MEM0_DR, MEM0_ENA, MEM0_R, MEM0_W, MEM1_DOUT, MEM1_DIN, MEM1_ENA);
+
+input [9:0] DIR_DMEM;
+input READ, WRITE;
+input [31:0] DATA_WRITE_DMEM;
+input [31:0] MEM0_DR;
+input [15:0] MEM1_DIN;		//para qué sirve 
+
+output [31:0] DATA_READ_DMEM;
+output [31:0] MEM0_DW;
+output MEM0_ENA,  MEM1_ENA, MEM0_R, MEM0_W;
+output [15:0] MEM1_DOUT;
+
+
+always@(DIR_DMEM)
+
+	if (DIR_DMEM [9] == 1'b0)
+	
+		begin
+		MEM0_ENA = 1'b1;
+		MEM0_R = READ;
+		MEM0_W = WRITE;
+		MEM0_DW = DATA_WRITE_DMEM;
+		
+			if (READ == 1'b1)
+				DATA_READ_DMEM = MEM0_DR;		//??
+			//else 
+				//DATA_READ_DMEM = DATA_READ_DMEM;
+		end
+				
+	else if (DIR_DMEM [9] == 1'b1)
+	
+		begin
+		MEM1_ENA = 1'b1;
+		MEM1_DOUT = DATA_WRITE_DMEM [15:0];
+		end
+		
+		
+endmodule
