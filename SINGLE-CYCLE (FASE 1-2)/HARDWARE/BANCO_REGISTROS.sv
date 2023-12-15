@@ -9,18 +9,19 @@ input [4:0] WRITE_REG;
 
 output [31:0] READ_DATA1, READ_DATA2;
 
-reg [31:0] [31:0]BANCO_REG_AUX;
+reg [31:0] BANCO_REG_AUX [31:0];
 
 
-assign READ_DATA1 = (WRITE_REG == 5'd0) ? 0:BANCO_REG_AUX[READ_REG1];
-assign READ_DATA2 = (WRITE_REG == 5'd0) ? 0:BANCO_REG_AUX[READ_REG2];
+assign READ_DATA1 = (READ_REG1 == 5'd0) ? 0:BANCO_REG_AUX[READ_REG1];
+assign READ_DATA2 = (READ_REG2 == 5'd0) ? 0:BANCO_REG_AUX[READ_REG2];
 
 	
 always @(posedge CLK or negedge RESET_N)
 begin
 	if (!RESET_N)
 		begin
-		BANCO_REG_AUX <= '0;
+		for (int i = 0; i < 32; i = i + 1) 
+        		BANCO_REG_AUX[i] <= 32'd0;
 		end
 	else
 		begin

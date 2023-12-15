@@ -8,7 +8,7 @@ module RAM (CLK, RESET_N, WRITE, READ, DATA_IN, ADDRESS, DATA_OUT);
 
 input CLK, RESET_N, WRITE, READ;
 input [31:0] DATA_IN;
-input [1023:0] ADDRESS;
+input [9:0] ADDRESS;
 output [31:0] DATA_OUT;
 
 //MEMORIA RAM
