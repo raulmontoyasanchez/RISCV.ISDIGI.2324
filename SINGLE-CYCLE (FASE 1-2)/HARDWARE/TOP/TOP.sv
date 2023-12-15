@@ -5,14 +5,14 @@ input CLK, RESET_N;
 //CABLES ROM
 wire [31:0] ROM_ADDRESS;
 wire [31:0] ROM_INSTRUCTION;
-wire READ, WRITE;
+
 //wire ROM_ENABLE;
 
 //CABLES RAM 
 output wire [31:0] RAM_DATAOUT;
 output wire [31:0] RAM_DATAIN;
 output wire [31:0] RAM_ADDRESS;
-
+wire READ, WRITE;
 
 //RAM INSTANCIA
 
