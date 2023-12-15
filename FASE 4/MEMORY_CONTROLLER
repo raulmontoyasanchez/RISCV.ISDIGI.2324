@@ -4,7 +4,7 @@ input [9:0] DIR_DMEM;
 input READ, WRITE;
 input [31:0] DATA_WRITE_DMEM;
 input [31:0] MEM0_DR;
-input [15:0] MEM1_DIN;		//para qué sirve 
+input [15:0] MEM1_DIN;	 
 
 output [31:0] DATA_READ_DMEM;
 output [31:0] MEM0_DW;
@@ -23,9 +23,8 @@ always@(DIR_DMEM)
 		MEM0_DW = DATA_WRITE_DMEM;
 		
 			if (READ == 1'b1)
-				DATA_READ_DMEM = MEM0_DR;		//??
-			//else 
-				//DATA_READ_DMEM = DATA_READ_DMEM;
+				DATA_READ_DMEM = MEM0_DR;		
+			
 		end
 				
 	else if (DIR_DMEM [9] == 1'b1)
@@ -34,6 +33,5 @@ always@(DIR_DMEM)
 		MEM1_ENA = 1'b1;
 		MEM1_DOUT = DATA_WRITE_DMEM [15:0];
 		end
-		
 		
 endmodule
