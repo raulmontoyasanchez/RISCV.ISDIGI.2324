@@ -1,41 +1,15 @@
 `timescale 1ns/100ps
-
-// clase
-class Instrucciones;
+class INSTRUCCIONES;
 
 	randc logic [31:0] INSTRUCCION;
+	randc logic [2:0] ALUOP;
 
-	constraint tipoR {INSTRUCCION[30:]==1'b0} //30 funct3 y fucnt 7 como cojo solo los bits q quiero?
-	constraint tipoI {INSTRUCCION[:]==1'b1} // funct3
-	constraint tipoICarga {INSTRUCCION[:]==1'b1} // funct3
-	constraint tipoS {INSTRUCCION[:]==1'b0} // funct 3
-	constraint tipoB {INSTRUCCION[:] ==1'b1} // funct 3
-	constraint tipoU {INSTRUCCION[:]==1'b0} // LUI y AUIPC opcode?
-	constraint tipoJ {INSTRUCCION[:] ==1'b1} // JAL opcode
+	constraint tipoR {INSTRUCCION[6:0]==7'b0110011} // TIPO R
+	constraint tipoI {INSTRUCCION[6:0]==7'b0010011} // TIPO I
+	//constraint tipoICarga {INSTRUCCION[6:0]==7'b0000011} // TIPO L (I CON CARGA)
+	constraint tipoS {INSTRUCCION[6:0]==7'b0100011} // TIPO S
+	constraint tipoB {INSTRUCCION[6:0] ==7'b1100011} // TIPO B
 endclass
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 module SINGLECYCLE_tb_AVANZADO();
 
@@ -53,11 +27,69 @@ TOP TOP_inst(
 );
 
 
-//Clock generation
-always 
-    begin 
-		#(T/2) CLK = ~CLK;
-	end
+covergroup Rcover;
+	AluOP: coverpoint ALUOP {bins binsALUOP[1]={3'b000} ;}
+	fun7: coverpoint INSTRUCCION[31:25] {bins binsFUN7[2]={7'b0000000, 7'b0100000} ;} // coverpoint INSTRUCCION[30] {bins binsFUN7[2]={0:1} ;}
+	fun3: coverpoint INSTRUCCION[14:12] {bins binsFUN3[8]={ [0:7]} ;}
+	fuente1: coverpoint INSTRUCCION[19:15] {bins binsFUENTE1[32]={ [0:31]} ;}
+	fuente2: coverpoint INSTRUCCION[24:20] {bins binsFUENTE2[32]={ [0:31]} ;}
+	destino: coverpoint INSTRUCCION[11:7] {bins binsDESTINO[32]={ [0:31]} ;}
+endgroup;
+
+covergroup Icover;
+	AluOP: coverpoint ALUOP {bins binsALUOP[1]={3'b001} ;}
+	//inmediato: coverpoint INSTRUCCION[31:20] {bins binsINMEDIATO[4096]={[0:4095]} ;} // revisar POS NEG
+	fuente1: coverpoint INSTRUCCION[19:15] {bins binsFUENTE1[32]={ [0:31]} ;}
+	destino: coverpoint INSTRUCCION[11:7] {bins binsDESTINO[32]={ [0:31]} ;}
+endgroup;
+
+
+covergroup Scover;
+	AluOP: coverpoint ALUOP {bins binsALUOP[1]={3'b011} ;}
+	//inmediato: coverpoint INSTRUCCION[31:25] {bins binsINMEDIATO[128]={[0:127]} ;} 
+	//inmediato2: coverpoint INSTRUCCION[11:7] {bins binsINMEDIATO2[32]={[0:31]} ;} 
+	fuente1: coverpoint INSTRUCCION[19:15] {bins binsFUENTE1[32]={ [0:31]} ;}
+	fuente2: coverpoint INSTRUCCION[24:20] {bins binsFUENTE2[32]={ [0:31]} ;}
+	fun3: coverpoint INSTRUCCION[14:12] {bins binsFUN3[8]={ [0:7]} ;}
+endgroup;
+
+covergroup Bcover;
+	AluOP: coverpoint ALUOP {bins binsALUOP[1]={3'b000} ;}
+	//inmediato: coverpoint INSTRUCCION[31] {bins binsINMEDIATO[2]={[0:1]} ;} 
+	//inmediato2: coverpoint INSTRUCCION[30:25] {bins binsINMEDIATO2[64]={[0:63]} ;} 
+	//inmediato3: coverpoint INSTRUCCION[11:8] {bins binsINMEDIATO[16]={[0:15]} ;} 
+	//inmediato4: coverpoint INSTRUCCION[7] {bins binsINMEDIATO2[2]={[0:1]} ;} 
+	fun3: coverpoint INSTRUCCION[14:12] {bins binsFUN3[8]={ [0:7]} ;}
+	fuente1: coverpoint INSTRUCCION[19:15] {bins binsFUENTE1[32]={ [0:31]} ;}
+	fuente2: coverpoint INSTRUCCION[24:20] {bins binsFUENTE2[32]={ [0:31]} ;}
+endgroup;
+
+INSTRUCCIONES instr_rcsg; 
+Rcover rcov_rcsg;
+Icover icov_rcsg;
+Scover scov_rcsg;
+Bcover bcov_rcsg;
+
+//EJECUCION DEL TEST
+
+initial 
+begin
+	instr_rcsg = new; 
+	rcov_rcsg = new;
+	icov_rcsg = new;
+	scov_rcsg = new;
+	bcov_rcsg = new;
+
+
+RSTa = 1'b1;
+CLK = 1'b0;
+			
+RESET();
+TIPO_R();
+TIPO_I();
+TIPO_S();
+TIPO_B();
+
 
 initial 
 begin
@@ -71,6 +103,10 @@ $stop;
 end 
 endmodule
 
+
+// TASK BASICAS Y GENERACION RELOJ
+
+
 task RESET ();
 begin
 RESET_N= 1'b0;
@@ -83,6 +119,79 @@ endtask
 always 
 begin
    #(T/2) CLK <= ~CLK;
+end
+
+
+//TASK TIPO INSTRUCCIONES
+
+task TIPO_R();
+begin
+$display ("empiezo la verificación TIPO R");
+instr_rcsg.tipoR.constraint_mode(1);
+instr_rcsg.tipoI.constraint_mode(0);
+instr_rcsg.tipoS.constraint_mode(0);
+instr_rcsg.tipoB.constraint_mode(0);
+
+while (rcov_rcsg.fun3.get_coverage()<100)
+begin
+
+		assert (instr_rcsg.randomize()) else $fatal("randomization failed");
+		GENINM (instr_rcsg.INSTRUCCION);
+		rcov_rcsg.sample();
+		$display(rcov_rcsg.fun3.get_coverage());
+end
+
+task TIPO_I();
+begin
+$display ("empiezo la verificación TIPO I");
+instr_rcsg.tipoR.constraint_mode(0);
+instr_rcsg.tipoI.constraint_mode(1);
+instr_rcsg.tipoS.constraint_mode(0);
+instr_rcsg.tipoB.constraint_mode(0);
+
+while (rcov_rcsg.fun3.get_coverage()<100)
+begin
+
+		assert (instr_rcsg.randomize()) else $fatal("randomization failed");
+		GENINM (instr_rcsg.INSTRUCCION);
+		rcov_rcsg.sample();
+		$display(rcov_rcsg.fun3.get_coverage());
+end
+
+task TIPO_S();
+begin
+$display ("empiezo la verificación TIPO S");
+instr_rcsg.tipoR.constraint_mode(0);
+instr_rcsg.tipoI.constraint_mode(0);
+instr_rcsg.tipoS.constraint_mode(1);
+instr_rcsg.tipoB.constraint_mode(0);
+
+while (rcov_rcsg.fun3.get_coverage()<100)
+begin
+
+		assert (instr_rcsg.randomize()) else $fatal("randomization failed");
+		GENINM (instr_rcsg.INSTRUCCION);
+		rcov_rcsg.sample();
+		$display(rcov_rcsg.fun3.get_coverage());
+end
+
+task TIPO_B();
+begin
+$display ("empiezo la verificación TIPO B");
+instr_rcsg.tipoR.constraint_mode(0);
+instr_rcsg.tipoI.constraint_mode(0);
+instr_rcsg.tipoS.constraint_mode(0);
+instr_rcsg.tipoB.constraint_mode(1);
+
+while (rcov_rcsg.fun3.get_coverage()<100)
+begin
+
+		assert (instr_rcsg.randomize()) else $fatal("randomization failed");
+		GENINM (instr_rcsg.INSTRUCCION);
+		rcov_rcsg.sample();
+		$display(rcov_rcsg.fun3.get_coverage());
+end
+
 end
 
 endmodule
