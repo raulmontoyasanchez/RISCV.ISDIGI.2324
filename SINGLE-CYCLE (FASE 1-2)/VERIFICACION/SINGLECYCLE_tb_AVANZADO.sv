@@ -1,4 +1,42 @@
 `timescale 1ns/100ps
+
+// clase
+class Instrucciones;
+
+	randc logic [31:0] INSTRUCCION;
+
+	constraint tipoR {INSTRUCCION[30:]==1'b0} //30 funct3 y fucnt 7 como cojo solo los bits q quiero?
+	constraint tipoI {INSTRUCCION[:]==1'b1} // funct3
+	constraint tipoICarga {INSTRUCCION[:]==1'b1} // funct3
+	constraint tipoS {INSTRUCCION[:]==1'b0} // funct 3
+	constraint tipoB {INSTRUCCION[:] ==1'b1} // funct 3
+	constraint tipoU {INSTRUCCION[:]==1'b0} // LUI y AUIPC opcode?
+	constraint tipoJ {INSTRUCCION[:] ==1'b1} // JAL opcode
+endclass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 module SINGLECYCLE_tb_AVANZADO();
 
 localparam T = 20;
