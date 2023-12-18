@@ -1,0 +1,89 @@
+module PLACA_FPGA (CLK, RESET_N, DOUT);
+
+input CLK, RESET_N;
+output [15:0] DOUT;
+
+//cables CORE-ROM
+wire [31:0] ROM_INSTRUCTION;
+wire [31:0] ROM_ADDRESS;
+
+//cables CORE-MEMORY_CONTROLLER
+wire READ, WRITE;
+wire [31:0] DATA_READ_DMEM_wire;
+wire [31:0] DIR_DMEM_wire;
+wire [31:0] DATA_WRITE_DMEM_wire;
+
+//cables MEMORY_CONTROLLER-GPIO 
+wire [15:0] MEM1_DOUT_wire;
+assign MEM1_DOUT_wire = DATA_WRITE_DMEM_wire [15:0];
+wire MEM1_ENA_wire;
+
+//cables MEMORY_CONTROLLER-RAM
+wire [31:0] MEM0_DW_wire, MEM0_DR_wire;
+wire MEM0_R_wire, MEM0_W_wire, MEM0_ENA_wire;
+
+
+
+//instancia CORE
+CORE inst_CORE (
+			.CLK(CLK),
+			.RESET_N(RESET_N),
+			.DATA_IMEM(ROM_INSTRUCTION),
+			.DATA_READ_DMEM(DATA_READ_DMEM_wire),
+			.DIR_IMEM(ROM_ADDRESS),
+			.DIR_DMEM(DIR_DMEM_wire),
+			.DATA_WRITE_DMEM(DATA_WRITE_DMEM_wire),
+			.READ(READ),
+			.WRITE(WRITE)
+			);
+
+//instancia MEMORY_CONTROLLER
+MEMORY_CONTROLLER inst_MEMORY_CONTROLLER (
+			.DIR_DMEM(DIR_DMEM_wire[11:2]),
+			.DATA_WRITE_DMEM(DATA_WRITE_DMEM_wire),
+			.DATA_READ_DMEM(DATA_READ_DMEM_wire),
+			.READ(READ),
+			.WRITE(WRITE), 
+			.MEM0_DW(MEM0_DW_wire),
+			.MEM0_DR(MEM0_DR_wire),
+			.MEM0_ENA(MEM0_ENA_wire),
+			.MEM0_R(MEM0_R_wire),
+			.MEM0_W(MEM0_W_wire),
+			.MEM1_DOUT(MEM1_DOUT_wire),
+			.MEM1_DIN(),
+			.MEM1_ENA(MEM1_ENA_wire)
+			);
+						
+//instancia GPIO
+GPIO inst_GPIO (
+			.MEM1_DOUT(MEM1_DOUT_wire),
+			.MEM1_DIN(),
+			.MEM1_ENA(MEM1_ENA_wire),
+			.DOUT(DOUT),
+			.DIN(),
+			.segment_data1(),
+			.segment_data2(),
+			.segment_data3(),
+			.segment_data4()
+			);
+
+//instancia RAM
+RAM inst_DMEM (
+			.CLK(CLK),
+			.RESET_N(RESET_N),
+			.WRITE(MEM0_W_wire),
+			.READ(MEM0_R_wire),
+			.DATA_IN(MEM0_DW_wire),
+			.ADDRESS(DIR_DMEM_wire[11:2]),
+			.DATA_OUT(MEM0_DR_wire),
+			.ENABLE(MEM0_ENA_wire)
+			);
+
+//instancia ROM
+ROM inst_IMEM (
+			.INS_ADDRESS(ROM_ADDRESS[11:2]),
+			.INSTRUCTION_OUT(ROM_INSTRUCTION),
+			.READ_EN(1'b1)
+			);
+
+endmodule 
