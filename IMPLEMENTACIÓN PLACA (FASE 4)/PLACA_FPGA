@@ -1,4 +1,6 @@
-module PLACA_FPGA (CLK, RESET_N, DOUT);
+module PLACA_FPGA (CLK50, RESET_N, DOUT);
+
+parameter C = 12500000;		// 0.25s/20ns	número de cuentas necesario para que el contador funcione como divisor de frecuencia
 
 input CLK, RESET_N;
 output [15:0] DOUT;
@@ -22,6 +24,15 @@ wire MEM1_ENA_wire;
 wire [31:0] MEM0_DW_wire, MEM0_DR_wire;
 wire MEM0_R_wire, MEM0_W_wire, MEM0_ENA_wire;
 
+
+//instancia contador como divisor de frecuencia
+counter #(.M(C)) divisor_frecuencia
+(	.CLK(CLK50),
+	.aRSTn(RESET_N), 
+	.ENA(1'b1),
+	.COUNT(),
+	.UP_DOWN(1'b1),
+	.TC(TC));
 
 
 //instancia CORE

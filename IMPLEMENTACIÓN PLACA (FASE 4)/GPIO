@@ -10,6 +10,8 @@ output [15:0] DOUT;
 wire [3:0] DOUT1, DOUT2, DOUT3, DOUT4;
 output reg [6:0] segment_data1, segment_data2, segment_data3, segment_data4;
 
+assign DOUT = MEM1_DOUT;
+
 assign DOUT1 = DOUT [15:12];
 assign DOUT2 = DOUT [11:8];
 assign DOUT3 = DOUT [7:4];

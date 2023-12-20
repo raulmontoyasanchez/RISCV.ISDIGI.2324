@@ -1,0 +1,30 @@
+module counter (CLK, aRSTn, ENA, COUNT, UP_DOWN, TC);
+	parameter	M = 14;								
+	parameter	N = $clog2(M);			//número de bits necesarios para la cuenta de módulo M				
+															
+															
+	input							CLK, aRSTn, ENA, UP_DOWN;
+	output	reg [N-1:0]		COUNT;
+	output						TC;
+	
+always @ (posedge CLK, negedge aRSTn)
+	begin
+		if (!aRSTn)
+				COUNT	<= 0;							
+		else if (ENA)	
+				if (UP_DOWN)
+					if (COUNT== M-1)				
+						COUNT <= 0;			
+					else				
+						COUNT <= COUNT+1; 
+				else 
+					if (COUNT== 0)					
+						COUNT <= M-1;		
+					else				
+						COUNT <= COUNT-1; 		
+	end
+
+assign		TC = (COUNT== M-1) ?	 ENA : 0;		//cada vez que la cuenta finaliza TC se pone a 1
+															
+															
+endmodule	
