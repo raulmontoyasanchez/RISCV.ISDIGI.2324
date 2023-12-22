@@ -25,7 +25,7 @@ initial
 begin
 CLK=0;
 RESET_N=0;
-@(posedge CLK)
+@(negedge CLK);
 RESET_N=1;
  
 //$readmemh("W:\\ISDIGITAREAFINAL\\codigo_fibonacci.txt",TOP_inst.RAM_INST.MRAM);
