@@ -78,7 +78,7 @@ begin
 	MEMREAD	= 	1'b0;
 	MEMTOREG	= 	1'b0;
 	MEMWRITE	= 	1'b0;
-	ALUSRC	= 	1'b1;
+	ALUSRC	= 	1'b0;
 	REGWRITE	= 	1'b0;
 	ALUOP		= 	3'b100;
 	AUIPCLUI	= 	2'b10;
