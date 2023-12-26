@@ -25,7 +25,7 @@ wire [2:0] ALUOP_AUX;
 wire [3:0] ALUSELECT_AUX;
 wire MUX_SELECT2;
 
-reg [31:0] PC;
+reg [31:0] PC_OUT;
 
 //LA INSTRUCCION SEGMENTADA SE USA DIRECTAMENTE LAS DEL SEGMENTADO (CREO)
 
@@ -47,8 +47,10 @@ assign INSTRUCTION = DATA_IMEM;
 
 //ASIGACIONES CONTINUAS 
 
-assign  PCSRC = (BRANCH_OUT_EX && ZERO_OUT_EX) ? 1'b1:1'b0; 
-assign  DIR_IMEM = PC; //DUDA*
+//assign  PCSRC = (BRANCH_OUT_EX && ZERO_OUT_EX) ? 1'b1:1'b0; 
+assign PC_IN = (BRANCH_OUT_EX && ZERO_OUT_EX) ? PC_OUT_EX:PC_OUT_EX+4;
+
+assign  DIR_IMEM = PC_OUT; //DUDA*
 assign  DIR_DMEM = ALURESULT_OUT_EX;
 assign  DATA_WRITE_DMEM = READ_DATA_2_OUT_EX; 
 assign  WRITE = (MEMWRITE_OUT_EX) ? 1'b1:1'b0; 
@@ -59,14 +61,11 @@ assign  READ = (MEMREAD_OUT_EX) ? 1'b1:1'b0;
 always @(posedge CLK or negedge RESET_N)
 begin 
    if (!RESET_N)
-       PC <= 32'b0;
+       PC_OUT <= 32'b0;
    else  
-		begin
-      case (PCSRC) // 		MUX QUE SELECCIONA SI SUMAMOS 1 O 4 AL PC
-          1'b0 : PC <= PC + 1'b4;
-          1'b1 : PC <= PC_OUT_EX; 
-      endcase
-      end 
+   	begin
+    	PC_OUT <= PC_IN;     
+    end 
 end
 
 //INSTANCIAS
@@ -106,10 +105,10 @@ reg [31:0] INST_OUT_IF;
 always @(posedge CLK or negedge RESET_N)
 begin 
    if (!RESET_N)
-       PC_OUT_IF <= 32'b0;
+         PC_OUT_IF <= 32'b0;
 		 INST_OUT_IF <= 32'b0; 
    else  
-		 PC_OUT_IF <= PC;
+		 PC_OUT_IF <= PC_OUT;
 		 INST_OUT_IF <= INSTRUCTION; 
 end
 
