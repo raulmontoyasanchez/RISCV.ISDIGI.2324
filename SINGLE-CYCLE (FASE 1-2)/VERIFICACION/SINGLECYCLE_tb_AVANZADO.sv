@@ -4,14 +4,20 @@ class INSTRUCCIONES;
     randc logic [31:0] INSTRUCCION;
     randc logic [2:0] ALUOP;
 
-    constraint tipoR {INSTRUCCION[6:0] == 7'b0110011;}
+    constraint tipoR {
+        INSTRUCCION[6:0] == 7'b0110011 &&
+        INSTRUCCION[31] == 1'b0 &&
+	INSTRUCCION[29:25] == 5'b00000;
+
+    }
+
     constraint rs1 {INSTRUCCION[19:15] == 5'd10;}
     constraint rs2 {INSTRUCCION[24:20] == 5'd11;}
     constraint rd {INSTRUCCION[11:7] == 5'd12;}
 
     constraint tipoI {INSTRUCCION[6:0] == 7'b0010011;}
     constraint tipoS {INSTRUCCION[6:0] == 7'b0100011;}
-    //constraint tipoB {INSTRUCCION[6:0] == 7'b1100011;}
+    constraint tipoB {INSTRUCCION[6:0] == 7'b1100011;}
 endclass
 
 module SINGLECYCLE_tb_AVANZADO();
@@ -20,7 +26,11 @@ module SINGLECYCLE_tb_AVANZADO();
     logic [31:0] RAM_DATAOUT;
     logic [31:0] RAM_DATAIN;
     logic [31:0] RAM_ADDRESS;
+    logic [31:0] ROM_ADDRESS;
     wire READ, WRITE;
+    logic [31:0] INSTRUCCION;
+
+    INSTRUCCIONES instr_rcsg;
 
     CORE CORE_INST(
         .CLK(CLK),
@@ -33,6 +43,7 @@ module SINGLECYCLE_tb_AVANZADO();
         .READ(READ),
         .WRITE(WRITE)
     );
+
 
     RAM RAM_INST(
         .CLK(CLK),
@@ -75,7 +86,7 @@ module SINGLECYCLE_tb_AVANZADO();
         }
     endgroup;
 
-    INSTRUCCIONES instr_rcsg;
+ 
     Rcover rcov_rcsg;
     Icover icov_rcsg;
     Scover scov_rcsg;
@@ -92,13 +103,16 @@ begin
 	scov_rcsg = new;
 	bcov_rcsg = new;
 
+
+     
+
 RESET_N = 1'b1;
 CLK = 1'b0;
 			
 RESET();
 TIPO_R();
-TIPO_I();
-TIPO_S();
+//TIPO_I();
+//TIPO_S();
 //TIPO_B();
 
  
@@ -156,21 +170,25 @@ task TIPO_R();
 $display ("empiezo la verificacion TIPO R");
 begin
 instr_rcsg.tipoR.constraint_mode(1);
+instr_rcsg.tipoI.constraint_mode(0);
+instr_rcsg.tipoS.constraint_mode(0);
+instr_rcsg.tipoB.constraint_mode(0);
 instr_rcsg.rs1.constraint_mode(1);
 instr_rcsg.rs2.constraint_mode(1);
 instr_rcsg.rd.constraint_mode(1);
 
 while (rcov_rcsg.cp_fun3_R.get_coverage() < 10) begin
-    // Generar instrucción aleatoria
+    // Generar instruccion aleatoria
     if (!instr_rcsg.randomize()) begin
-        $display("Error al generar instrucción aleatoria, TIPO R");
+        $display("Error al generar instruccion aleatoria, TIPO R");
         break;
     end
 
-    // Verificar la instrucción y SEL ALU
-    $display("Instrucción generada: %h", instr_rcsg.INSTRUCCION);
+    // Verificar la instruccion y SEL ALU
+    $display("Instruccion generada aleatoria: %b %b", instr_rcsg.INSTRUCCION[30], instr_rcsg.INSTRUCCION[14:12]);
+    $display("Seleccion operacion de la ALU: %b" , CORE_INST.ALU_inst.OPERATION);
 
-    assert(CORE_INST.ALU_CONTROL_inst.INSTRUCCION == {instr_rcsg.INSTRUCCION[30], instr_rcsg.INSTRUCCION[14:12]})
+    assert(CORE_INST.ALU_inst.OPERATION == {instr_rcsg.INSTRUCCION[30], instr_rcsg.INSTRUCCION[14:12]})
         $display("INSTRUCCION Y SEL ALU VERIFICADAS CON EXITO, TIPO R");
     else
         $display("INSTRUCCION Y SEL ALU NO COINCIDEN, ERROR TIPO R");
@@ -178,7 +196,7 @@ end
 end
 endtask
 
-// VERIFICACIÓN TIPO I
+// VERIFICACION TIPO I
 task TIPO_I();
 $display ("empiezo la verificacion TIPO I");
 begin
@@ -187,22 +205,22 @@ instr_rcsg.rs1.constraint_mode(1);
 instr_rcsg.rs2.constraint_mode(0);
 instr_rcsg.rd.constraint_mode(1);
 
-while (rcov_rcsg.cp_fun3_I.get_coverage() < 10) begin
-    // Generar instrucción aleatoria
+while (icov_rcsg.cp_fun3_I.get_coverage() < 10) begin
+    // Generar instruccion aleatoria
     if (!instr_rcsg.randomize()) begin
-        $display("Error al generar instrucción aleatoria, TIPO I");
+        $display("Error al generar instruccion aleatoria, TIPO I");
         break;
     end
 
-    // Verificar la instrucción y SEL ALU
-    $display("Instrucción generada: %h", instr_rcsg.INSTRUCCION);
+    // Verificar la instruccion y SEL ALU
+    $display("Instruccion generada: %h", instr_rcsg.INSTRUCCION);
 
     assert(CORE_INST.ALU_CONTROL_inst.INSTRUCCION == { instr_rcsg.INSTRUCCION[14:12]})
         $display("INSTRUCCION Y SEL ALU VERIFICADAS CON EXITO, TIPO I");
     else
         $display("INSTRUCCION Y SEL ALU NO COINCIDEN, ERROR TIPO I");
 
-	// Aquí habría que comprobar el inmediato.
+	// Aqui habra que comprobar el inmediato.
 	 assert(CORE_INST.GENINM_inst.INMEDIATO == {instr_rcsg.INSTRUCCION[31:20]})
         $display("INSTRUCCION Y INMEDIATO VERIFICADAS CON EXITO, TIPO I");
     else
@@ -211,7 +229,7 @@ end
 end
 endtask
 
-// VERIFICACIÓN TIPO S/L (Hay que comprobar dirección destino/origen)
+// VERIFICACION TIPO S/L (Hay que comprobar direccion destino/origen)
 task TIPO_S();
 $display ("empiezo la verificacion TIPO S");
 begin
@@ -221,14 +239,14 @@ instr_rcsg.rs2.constraint_mode(1);
 instr_rcsg.rd.constraint_mode(0);
 
 //while (rcov_rcsg.cp_fun3_S.get_coverage() < 10) begin
-    // Generar instrucción aleatoria
+    // Generar instruccion aleatoria
     //if (!instr_rcsg.randomize()) begin
-    //    $display("Error al generar instrucción aleatoria, TIPO S");
+    //    $display("Error al generar instrucciÃ³n aleatoria, TIPO S");
     //    break;
     //end
 
-    // Verificar la instrucción y SEL ALU
-    //$display("Instrucción generada: %h", instr_rcsg.INSTRUCCION);
+    // Verificar la instruccion y SEL ALU
+    //$display("Instruccion generada: %h", instr_rcsg.INSTRUCCION);
 
     //assert(CORE_INST.ALU_CONTROL_inst.INSTRUCCION == { instr_rcsg.INSTRUCCION[14:12]})
     //    $display("INSTRUCCION Y SEL ALU VERIFICADAS CON EXITO, TIPO S");
@@ -244,7 +262,7 @@ instr_rcsg.rd.constraint_mode(0);
 end
 endtask
 
-//VERIFICACION TIPO B (Comprobar condición de salto e inmediato)
+//VERIFICACION TIPO B (Comprobar condicion de salto e inmediato)
 task TIPO_B();
 $display ("empiezo la verificacion TIPO B");
 begin
@@ -253,22 +271,22 @@ instr_rcsg.rs1.constraint_mode(1);
 instr_rcsg.rs2.constraint_mode(1);
 instr_rcsg.rd.constraint_mode(0);
 
-while (rcov_rcsg.cp_fun3_S.get_coverage() < 10) begin
-    // Generar instrucción aleatoria
+while (bcov_rcsg.cp_fun3_B.get_coverage() < 10) begin
+    // Generar instruccion aleatoria
     if (!instr_rcsg.randomize()) begin
-        $display("Error al generar instrucción aleatoria, TIPO I");
+        $display("Error al generar instruccion aleatoria, TIPO I");
         break;
     end
 
-    // Verificar la instrucción y SEL ALU
-    $display("Instrucción generada: %h", instr_rcsg.INSTRUCCION);
+    // Verificar la instruccion y SEL ALU
+    $display("Instruccion generada: %h", instr_rcsg.INSTRUCCION);
 
     assert(CORE_INST.ALU_CONTROL_inst.INSTRUCCION == { instr_rcsg.INSTRUCCION[14:12]})
         $display("INSTRUCCION Y SEL ALU VERIFICADAS CON EXITO, TIPO I");
     else
         $display("INSTRUCCION Y SEL ALU NO COINCIDEN, ERROR TIPO I");
 
-	// Aquí habría que comprobar el inmediato.
+	// Aqui habra que comprobar el inmediato.
 	 assert(CORE_INST.GENINM_inst.INMEDIATO == {instr_rcsg.INSTRUCCION[31:20]})
         $display("INSTRUCCION Y INMEDIATO VERIFICADAS CON EXITO, TIPO I");
     else
@@ -276,6 +294,5 @@ while (rcov_rcsg.cp_fun3_S.get_coverage() < 10) begin
 end
 end
 endtask
+
 endmodule
-
-
